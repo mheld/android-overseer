@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="hello">Hello World</string>
     <string name="app_name">Overseer</string>
+    <!-- marc's key -->
+    <string name="maps_key">0ann4TlG_ePjQNI9Il2YXcCeAFxI5igcdqHBmrA</string>
+    <!-- production key 
+    <string name="maps_key">0ann4TlG_ePjQNI9Il2YXcCeAFxI5igcdqHBmrA</string>
+    -->
 </resources>
