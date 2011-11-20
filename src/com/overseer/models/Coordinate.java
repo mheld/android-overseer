@@ -3,6 +3,7 @@ package com.overseer.models;
 import java.util.Date;
 import java.util.List;
 
+import com.google.android.maps.GeoPoint;
 import com.overseer.db.DatabaseAdapter;
 import com.overseer.db.DatabaseAdapter.CoordinateColumns;
 
@@ -53,17 +54,22 @@ public class Coordinate implements DatabaseElement<Coordinate> {
 	public Date getCreatedAt() {
 		return created_at;
 	}
+	
+	public GeoPoint toGeoPoint(){
+		return new GeoPoint(
+				(int) (this.latitude * 1e6),
+				(int) (this.longitude * 1e6));
+	}
 
 	@Override
 	public List<Coordinate> create(DatabaseAdapter db) {
 		db.create(this);
 		
-		//TODO: this should return a list of the coordinates that are around
-		return null;
+		return db.getCoordinates();
 	}
 	
 	public static List<Coordinate> allCoordinates(DatabaseAdapter db){
-		return null;
+		return db.getCoordinates();
 	}
 
 }

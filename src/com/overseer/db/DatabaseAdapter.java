@@ -1,5 +1,8 @@
 package com.overseer.db;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.overseer.models.Coordinate;
 import com.overseer.utils.Log;
 
@@ -39,7 +42,7 @@ public class DatabaseAdapter {
 			"(" + 
 			CoordinateColumns._ID      	+ " integer primary key autoincrement, " +
 			CoordinateColumns.LATITUDE    + " text not null, " +
-			CoordinateColumns.LONGITUDE	+ " text not null" +
+			CoordinateColumns.LONGITUDE	+ " text not null, " +
 			CoordinateColumns.CREATED_AT	+ " text not null" +
 			")";
 
@@ -86,7 +89,7 @@ public class DatabaseAdapter {
 			ContentValues initialValues = new ContentValues();
 			initialValues.put(CoordinateColumns.LATITUDE, c.getLatitude());
 			initialValues.put(CoordinateColumns.LONGITUDE, c.getLongitude());
-			initialValues.put(CoordinateColumns.CREATED_AT, c.getCreatedAt().getTime());
+			initialValues.put(CoordinateColumns.CREATED_AT, System.currentTimeMillis());
 
 			return mDb.insert(CoordinateColumns.TABLE, null, initialValues);
 		}
@@ -124,5 +127,30 @@ public class DatabaseAdapter {
 	
 	public long create(Coordinate c){
 		return mDbHelper.create(c);
+	}
+	
+	public List<Coordinate> getCoordinates(){
+		return getCoordinates(mDbHelper.fetchAllCoordinates());
+	}
+
+	private List<Coordinate> getCoordinates(Cursor coordCursor){
+		try {
+			ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
+
+			coordCursor.moveToFirst();
+			for (int i = 0; i < coordCursor.getCount(); i++) {
+				coordinates.add(new Coordinate(coordCursor));
+				coordCursor.moveToNext();
+			}
+			coordCursor.close();
+
+			return coordinates;
+
+		} catch (SQLException e) {
+			Log.e("Exception on query", e);
+			return new ArrayList<Coordinate>();
+		} finally{
+			coordCursor.close();
+		}
 	}
 }

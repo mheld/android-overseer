@@ -24,6 +24,13 @@
 
         <!-- SERVICES -->
         <service android:name=".SamplerService" />
+        
+        <!-- RECEIVERS -->
+		<receiver android:name=".SampleScheduler">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- PERMISSIONS -->
