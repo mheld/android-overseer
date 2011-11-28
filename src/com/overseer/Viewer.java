@@ -27,10 +27,11 @@ public class Viewer extends MapActivity {
         ensureSampling();
         setupState();
         drawMap();
+        drawActivityGraph();
     }
     
     private void ensureSampling(){
-    	Intent i = new Intent(this, SamplerScheduler.class);
+    	Intent i = new Intent(this, SampleScheduler.class);
     	this.sendBroadcast(i);
     }
     
@@ -58,6 +59,10 @@ public class Viewer extends MapActivity {
         }
         
         mapOverlays.add(itemizedoverlay);
+    }
+    
+    private void drawActivityGraph(){
+    	//TODO: fill in
     }
 
 

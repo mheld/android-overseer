@@ -23,7 +23,7 @@
         </activity>
 
         <!-- SERVICES -->
-        <service android:name=".SamplerService" />
+        <service android:name=".Sampler" />
         
         <!-- RECEIVERS -->
 		<receiver android:name=".SampleScheduler">

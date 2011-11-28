@@ -1,24 +1,34 @@
 package com.overseer;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import com.overseer.MyLocation.LocationResult;
 import com.overseer.db.DbDoer;
+import com.overseer.models.ActivityPoint;
 import com.overseer.models.Coordinate;
+import com.overseer.utils.ActivityVector;
+import com.overseer.utils.Log;
 
 
-public class SamplerService extends IntentService {
-	public SamplerService() {
+public class Sampler extends IntentService {
+	public Sampler() {
 		super("Sampler Service");
 	}
 
@@ -31,13 +41,14 @@ public class SamplerService extends IntentService {
 		try {
 			method = b.getString("method");
 		} catch (Exception e) {
-			// something fucked up somewhere
-			e.printStackTrace();
+			method = "sampleGps";
 		}
 
 		try {
 			if (method.equals("sampleGps")) {
+				Log.d("I AM SAMPLING!");
 				sampleGps(context);
+				sampleActivity(context);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -45,11 +56,49 @@ public class SamplerService extends IntentService {
 	}
 
 	public static void sendMessage(Context context, String s){
-		Intent i = new Intent(context, SamplerService.class);
+		Intent i = new Intent(context, Sampler.class);
 		i.putExtra("method", s);
 		context.startService(i);
 	}
 
+	private void sampleActivity(Context context){
+		final SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+		Sensor sensor = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
+		final ArrayList<ActivityVector> vectors = new ArrayList<ActivityVector>();
+		
+		SensorEventListener accelerationListener = new SensorEventListener() {
+			private int count = 0;
+			
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int acc) {
+			}
+	 
+			@Override
+			public void onSensorChanged(SensorEvent event) {
+				count++;
+				vectors.add(new ActivityVector(event.values[0], event.values[1], event.values[2]));
+				if(count >= 60){
+					sensorManager.unregisterListener(this);
+				}
+			}
+	 
+		};
+		
+		sensorManager.registerListener(accelerationListener, sensor, 1000);
+		
+		final ActivityPoint dp = new ActivityPoint(vectors);
+		new DbDoer<Object>(context){
+
+			@Override
+			public Object perform() {
+				dp.create(db);
+				return null;
+			}
+			
+		};
+	}
+	
+	
 	private void sampleGps(final Context context){
 		try {
 			ConnectivityManager cm = (ConnectivityManager) context

@@ -11,8 +11,8 @@ import android.database.Cursor;
 import android.location.Location;
 
 public class Coordinate implements DatabaseElement<Coordinate> {
-	Double latitude;
-	Double longitude;
+	double latitude;
+	double longitude;
 	Date created_at;
 	
 	public Coordinate(Location loc) {
@@ -35,7 +35,7 @@ public class Coordinate implements DatabaseElement<Coordinate> {
 				new Date(c.getLong(c.getColumnIndex(CoordinateColumns.CREATED_AT))));
 	}
 
-	public Double getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
@@ -43,7 +43,7 @@ public class Coordinate implements DatabaseElement<Coordinate> {
 		this.latitude = latitude;
 	}
 
-	public Double getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 

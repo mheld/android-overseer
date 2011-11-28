@@ -2,7 +2,7 @@ package com.overseer.utils;
 
 public class Log {
 	public final static String LOGTAG = "overseer";
-	public static final boolean debug = false;
+	public static final boolean debug = true;
 
 	public static void v(String logMe) {
 		if(debug){

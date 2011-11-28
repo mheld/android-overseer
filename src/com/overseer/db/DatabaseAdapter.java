@@ -3,6 +3,7 @@ package com.overseer.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.overseer.models.ActivityPoint;
 import com.overseer.models.Coordinate;
 import com.overseer.utils.Log;
 
@@ -26,7 +27,7 @@ public class DatabaseAdapter {
 	};
 
 	/*o***********************************************************************/
-	/*FEEDS*******************************************************************/
+	/*COORDINATES*************************************************************/
 	/*o***********************************************************************/
 	public static final class CoordinateColumns implements BaseColumns {
 		public static final String TABLE 		= "locations";
@@ -36,7 +37,6 @@ public class DatabaseAdapter {
 		
 	}
 
-	//TODO: really shouldn't be all text columns
 	private static final String COORDINATES_CREATE = 
 			maybeCreate(CoordinateColumns.TABLE) +
 			"(" + 
@@ -46,6 +46,24 @@ public class DatabaseAdapter {
 			CoordinateColumns.CREATED_AT	+ " text not null" +
 			")";
 
+	/*o***********************************************************************/
+	/*ACTIVITYPOINTS**********************************************************/
+	/*o***********************************************************************/
+	
+	public static final class ActivityPointColumns implements BaseColumns {
+		public static final String TABLE 		= "activity_points";
+		public static final String MAGNITUDE 	= "magnitude";
+		public static final String CREATED_AT	= "created_at";
+		
+	}
+
+	private static final String ACTIVITY_POINTS_CREATE = 
+			maybeCreate(ActivityPointColumns.TABLE) +
+			"(" + 
+			ActivityPointColumns._ID      	+ " integer primary key autoincrement, " +
+			ActivityPointColumns.MAGNITUDE  + " text not null, " +
+			ActivityPointColumns.CREATED_AT	+ " text not null" +
+			")";
 
 	private static String maybeCreate(String table){
 		return "create table if not exists " + table + " ";
@@ -69,17 +87,14 @@ public class DatabaseAdapter {
 			Log.w("Upgrading database from version " + oldVersion + " to "
 					+ newVersion + ", which will destroy all old data");
 			db.execSQL("DROP TABLE IF EXISTS " + CoordinateColumns.TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + ActivityPointColumns.TABLE);
 			onCreate(db);
 		}
 
 		/*o***********************************************************************/
-		/*Coordinates*************************************************************/
+		/*COORDINATES*************************************************************/
 		/*o***********************************************************************/
 
-		/**
-		 * Fetches all coordinates (a cursor)
-		 * @return cursor that holds all coordinates
-		 */
 		public Cursor fetchAllCoordinates() {
 			return mDb.rawQuery("select * from "+ CoordinateColumns.TABLE+" order by "+
 					CoordinateColumns.CREATED_AT+" ASC", new String[]{});
@@ -93,6 +108,24 @@ public class DatabaseAdapter {
 
 			return mDb.insert(CoordinateColumns.TABLE, null, initialValues);
 		}
+		
+		/*o***********************************************************************/
+		/*ACTIVITYPOINTS**********************************************************/
+		/*o***********************************************************************/
+		
+		public Cursor fetchAllActivityPoints() {
+			return mDb.rawQuery("select * from "+ ActivityPointColumns.TABLE+" order by "+
+					ActivityPointColumns.CREATED_AT+" ASC", new String[]{});
+		}
+		
+		public long create(ActivityPoint a){
+			ContentValues initialValues = new ContentValues();
+			initialValues.put(ActivityPointColumns.MAGNITUDE, a.getMagnitude());
+			initialValues.put(ActivityPointColumns.CREATED_AT, System.currentTimeMillis());
+
+			return mDb.insert(ActivityPointColumns.TABLE, null, initialValues);
+		}
+		
 	}
 
 	public static int booleanToSQL(Boolean b){
@@ -117,13 +150,19 @@ public class DatabaseAdapter {
 		try{
 			mDb.close();
 		}catch(NullPointerException e){
+			e.printStackTrace();
 		}
 	}
 
 	private void createAllTables(SQLiteDatabase db) throws SQLException{
 		db.execSQL(COORDINATES_CREATE);
+		db.execSQL(ACTIVITY_POINTS_CREATE);
 	}
 
+	
+	/*o***********************************************************************/
+	/*COORDINATES*************************************************************/
+	/*o***********************************************************************/
 	
 	public long create(Coordinate c){
 		return mDbHelper.create(c);
@@ -151,6 +190,39 @@ public class DatabaseAdapter {
 			return new ArrayList<Coordinate>();
 		} finally{
 			coordCursor.close();
+		}
+	}
+	
+	/*o***********************************************************************/
+	/*ACTIVITYPOINTS**********************************************************/
+	/*o***********************************************************************/
+	
+	public long create(ActivityPoint a){
+		return mDbHelper.create(a);
+	}
+	
+	public List<ActivityPoint> getActivityPoints(){
+		return getActivityPoints(mDbHelper.fetchAllActivityPoints());
+	}
+
+	private List<ActivityPoint> getActivityPoints(Cursor apCursor){
+		try {
+			ArrayList<ActivityPoint> points = new ArrayList<ActivityPoint>();
+
+			apCursor.moveToFirst();
+			for (int i = 0; i < apCursor.getCount(); i++) {
+				points.add(new ActivityPoint(apCursor));
+				apCursor.moveToNext();
+			}
+			apCursor.close();
+
+			return points;
+
+		} catch (SQLException e) {
+			Log.e("Exception on query", e);
+			return new ArrayList<ActivityPoint>();
+		} finally{
+			apCursor.close();
 		}
 	}
 }
