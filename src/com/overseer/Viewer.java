@@ -7,16 +7,20 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.overseer.db.DbDoer;
+import com.overseer.models.ActivityPoint;
 import com.overseer.models.Coordinate;
 import com.overseer.utils.BasicItemizedOverlay;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 public class Viewer extends MapActivity {
-	MapView mMapView;
+	static MapView mMapView;
 	List<Coordinate> mCoordinates;
+	List<ActivityPoint> mActivities;
 	
 
     @Override
@@ -26,8 +30,14 @@ public class Viewer extends MapActivity {
         
         ensureSampling();
         setupState();
-        drawMap();
         drawActivityGraph();
+    }
+    
+    @Override
+    public void onResume(){
+    	super.onResume();
+    	drawMap(); 
+    	//drawMap needs to be in onResume because we move the map into SingleEventViewer
     }
     
     private void ensureSampling(){
@@ -41,15 +51,17 @@ public class Viewer extends MapActivity {
 			@Override
 			public Object perform() {
 				mCoordinates = Coordinate.allCoordinates(db);
+				mActivities = ActivityPoint.allActivityPoints(db);
 				return null;
 			}
         	
         };
-        
-        mMapView = (MapView)findViewById(R.id.main_map_view);
     }
     
     private void drawMap(){
+    	mMapView = Viewer.materializeMap(this);
+    	LinearLayout mapLayout = (LinearLayout)findViewById(R.id.main_map_view);
+    	mapLayout.addView(mMapView);
     	List<Overlay> mapOverlays = mMapView.getOverlays();
         Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
         
@@ -64,11 +76,21 @@ public class Viewer extends MapActivity {
     private void drawActivityGraph(){
     	//TODO: fill in
     }
+    
+    //yay, singleton!
+    public static MapView materializeMap(Context context){
+    	if(mMapView == null){
+    		mMapView = new MapView(context, context.getString(R.string.maps_key));
+    	}else{
+    		//we've already created it
+    	}
+    	
+    	return mMapView;
+    }
 
 
 	@Override
 	protected boolean isRouteDisplayed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

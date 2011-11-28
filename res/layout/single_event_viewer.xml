@@ -4,29 +4,23 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
     
-    <LinearLayout android:id="@+id/event_categorizer_mapview"
+    <LinearLayout android:id="@+id/single_event_viewer_mapview"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content" />
     
-    <LinearLayout android:id="@+id/event_categorizer_start"
+    <LinearLayout android:id="@+id/single_event_viewer_start"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content" />
-	<LinearLayout android:id="@+id/event_categorizer_end"
+	<LinearLayout android:id="@+id/single_event_viewer_end"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content" />
-	<LinearLayout android:id="@+id/event_categorizer_activity"
+	<LinearLayout android:id="@+id/single_event_viewer_activity"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content" />
-	<LinearLayout android:id="@+id/event_categorizer_food"
+	<LinearLayout android:id="@+id/single_event_viewer_food"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content" />
-	<LinearLayout android:id="@+id/event_categorizer_stress"
+	<LinearLayout android:id="@+id/single_event_viewer_stress"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content" />
-	<LinearLayout android:id="@+id/event_categorizer_tweet"
-        android:layout_width="fill_parent"
-    	android:layout_height="wrap_content" />
-
-    
-
 </LinearLayout>

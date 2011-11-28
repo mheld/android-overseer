@@ -16,8 +16,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 
 import com.overseer.MyLocation.LocationResult;
 import com.overseer.db.DbDoer;

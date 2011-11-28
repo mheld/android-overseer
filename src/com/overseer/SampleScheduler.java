@@ -16,7 +16,7 @@ public class SampleScheduler extends BroadcastReceiver{
 		
 		alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 
 				System.currentTimeMillis(),
-				(2 * 60 * 1000), //every 2 minutes
+				(5 * 60 * 1000), //every 5 minutes
 				pendingIntent);
 	}
 }

@@ -4,9 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     
-    <com.google.android.maps.MapView android:id="@+id/main_map_view"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:clickable="true"
-        	android:apiKey="@string/maps_key" />
+    <LinearLayout android:id="@+id/main_map_view"
+        	android:layout_width="fill_parent"
+        	android:layout_height="fill_parent" />
 </LinearLayout>

@@ -9,11 +9,15 @@ import com.overseer.db.DatabaseAdapter.CoordinateColumns;
 
 import android.database.Cursor;
 import android.location.Location;
+import android.os.Bundle;
 
 public class Coordinate implements DatabaseElement<Coordinate> {
 	double latitude;
 	double longitude;
 	Date created_at;
+	
+	
+	private Coordinate(){}
 	
 	public Coordinate(Location loc) {
 		this(loc.getLatitude(), loc.getLongitude());
@@ -70,6 +74,13 @@ public class Coordinate implements DatabaseElement<Coordinate> {
 	
 	public static List<Coordinate> allCoordinates(DatabaseAdapter db){
 		return db.getCoordinates();
+	}
+	
+	public static Coordinate fromBundle(Bundle extras){
+		Coordinate c = new Coordinate();
+		c.setLatitude(extras.getDouble("latitude"));
+		c.setLongitude(extras.getDouble("longitude"));
+		return c;
 	}
 
 }
