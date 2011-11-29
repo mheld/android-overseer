@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.overseer.models.ActivityPoint;
+import com.overseer.models.Chunk;
 import com.overseer.models.Coordinate;
 import com.overseer.utils.Log;
 
@@ -20,7 +21,7 @@ public class DatabaseAdapter {
 	private Context context;
 	private DatabaseHelper mDbHelper;
 	private static final String DATABASE_NAME = "data";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 
 	public DatabaseAdapter(Context c){
 		this.context = c.getApplicationContext();		
@@ -34,7 +35,6 @@ public class DatabaseAdapter {
 		public static final String LATITUDE 	= "latitude";
 		public static final String LONGITUDE	= "longitude";
 		public static final String CREATED_AT	= "created_at";
-		
 	}
 
 	private static final String COORDINATES_CREATE = 
@@ -54,7 +54,6 @@ public class DatabaseAdapter {
 		public static final String TABLE 		= "activity_points";
 		public static final String MAGNITUDE 	= "magnitude";
 		public static final String CREATED_AT	= "created_at";
-		
 	}
 
 	private static final String ACTIVITY_POINTS_CREATE = 
@@ -63,6 +62,32 @@ public class DatabaseAdapter {
 			ActivityPointColumns._ID      	+ " integer primary key autoincrement, " +
 			ActivityPointColumns.MAGNITUDE  + " text not null, " +
 			ActivityPointColumns.CREATED_AT	+ " text not null" +
+			")";
+	
+	/*o***********************************************************************/
+	/*CHUNKS******************************************************************/
+	/*o***********************************************************************/
+	
+	public static final class ChunkColumns implements BaseColumns {
+		public static final String TABLE 				= "chunks";
+		public static final String FROM 				= "from";
+		public static final String UNTIL				= "until";
+		public static final String STRESS				= "stress_level";
+		public static final String ACTIVITY_CATEGORY	= "activity_category";
+		public static final String FOOD					= "food";
+		public static final String CREATED_AT			= "created_at";
+	}
+
+	private static final String CHUNKS_CREATE = 
+			maybeCreate(ChunkColumns.TABLE) +
+			"(" + 
+			ChunkColumns._ID      			+ " integer primary key autoincrement, " +
+			ChunkColumns.CREATED_AT			+ " text not null" +
+			ChunkColumns.FROM				+ " text not null, " +
+			ChunkColumns.UNTIL				+ " text not null, " +
+			ChunkColumns.STRESS				+ " integer not null, " +
+			ChunkColumns.ACTIVITY_CATEGORY	+ " text not null, " +
+			ChunkColumns.FOOD				+ " text" +
 			")";
 
 	private static String maybeCreate(String table){
@@ -88,6 +113,7 @@ public class DatabaseAdapter {
 					+ newVersion + ", which will destroy all old data");
 			db.execSQL("DROP TABLE IF EXISTS " + CoordinateColumns.TABLE);
 			db.execSQL("DROP TABLE IF EXISTS " + ActivityPointColumns.TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + ChunkColumns.TABLE);
 			onCreate(db);
 		}
 
@@ -126,6 +152,27 @@ public class DatabaseAdapter {
 			return mDb.insert(ActivityPointColumns.TABLE, null, initialValues);
 		}
 		
+		/*o***********************************************************************/
+		/*CHUNKS******************************************************************/
+		/*o***********************************************************************/
+		
+		public Cursor fetchAllChunks() {
+			return mDb.rawQuery("select * from "+ ChunkColumns.TABLE+" order by "+
+					ChunkColumns.CREATED_AT+" ASC", new String[]{});
+		}
+		
+		public long create(Chunk c){
+			ContentValues initialValues = new ContentValues();
+			initialValues.put(ChunkColumns.FROM, c.getFrom().getTime());
+			initialValues.put(ChunkColumns.UNTIL, c.getUntil().getTime());
+			initialValues.put(ChunkColumns.ACTIVITY_CATEGORY, c.getActivityCategory());
+			initialValues.put(ChunkColumns.FOOD, c.getFood());
+			initialValues.put(ChunkColumns.STRESS, c.getStressLevel());
+			initialValues.put(ChunkColumns.CREATED_AT, System.currentTimeMillis());
+
+			return mDb.insert(ChunkColumns.TABLE, null, initialValues);
+		}
+		
 	}
 
 	public static int booleanToSQL(Boolean b){
@@ -157,6 +204,7 @@ public class DatabaseAdapter {
 	private void createAllTables(SQLiteDatabase db) throws SQLException{
 		db.execSQL(COORDINATES_CREATE);
 		db.execSQL(ACTIVITY_POINTS_CREATE);
+		db.execSQL(CHUNKS_CREATE);
 	}
 
 	
@@ -223,6 +271,39 @@ public class DatabaseAdapter {
 			return new ArrayList<ActivityPoint>();
 		} finally{
 			apCursor.close();
+		}
+	}
+	
+	/*o***********************************************************************/
+	/*CHUNKS******************************************************************/
+	/*o***********************************************************************/
+	
+	public long create(Chunk c){
+		return mDbHelper.create(c);
+	}
+	
+	public List<Chunk> getChunks(){
+		return getChunks(mDbHelper.fetchAllChunks());
+	}
+
+	private List<Chunk> getChunks(Cursor chunkCursor){
+		try {
+			ArrayList<Chunk> chunks = new ArrayList<Chunk>();
+
+			chunkCursor.moveToFirst();
+			for (int i = 0; i < chunkCursor.getCount(); i++) {
+				chunks.add(new Chunk(chunkCursor));
+				chunkCursor.moveToNext();
+			}
+			chunkCursor.close();
+
+			return chunks;
+
+		} catch (SQLException e) {
+			Log.e("Exception on query", e);
+			return new ArrayList<Chunk>();
+		} finally{
+			chunkCursor.close();
 		}
 	}
 }
