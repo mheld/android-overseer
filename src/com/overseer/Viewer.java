@@ -14,6 +14,7 @@ import com.overseer.models.Chunk;
 import com.overseer.models.Coordinate;
 import com.overseer.utils.BasicItemizedOverlay;
 import com.overseer.utils.Comms;
+import com.overseer.utils.Log;
 
 import android.content.Context;
 import android.content.Intent;
@@ -63,11 +64,14 @@ public class Viewer extends MapActivity {
 				cal.add(Calendar.HOUR_OF_DAY, 1);
 				Date right = cal.getTime();
 				mCoordinates = Coordinate.all(db);
-				mActivities = ActivityPoint.all(db);
-				Chunk.calculateChunksByActivityPoints(db);
-				Chunk.calculateChunksByCoordinates(db);
-				ActivityPoint.allBetween(db, left, right);
-				Coordinate.allBetween(db, left, right);
+				//mActivities = ActivityPoint.all(db);
+				for(Chunk c: Chunk.calculateChunksByCoordinates(db)){
+				//for(Chunk c : Chunk.calculateChunksByActivityPoints(db)){
+					Log.d("start at -> "+c.getFrom());
+					Log.d("end at -> "+c.getUntil());
+				}
+				//ActivityPoint.allBetween(db, left, right);
+				//Coordinate.allBetween(db, left, right);
 				
 				
 				

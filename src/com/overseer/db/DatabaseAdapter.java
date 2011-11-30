@@ -71,8 +71,8 @@ public class DatabaseAdapter {
 	
 	public static final class ChunkColumns implements BaseColumns {
 		public static final String TABLE 				= "chunks";
-		public static final String FROM 				= "from";
-		public static final String UNTIL				= "until";
+		public static final String FROM 				= "start";
+		public static final String UNTIL				= "end";
 		public static final String STRESS				= "stress_level";
 		public static final String ACTIVITY_CATEGORY	= "activity_category";
 		public static final String FOOD					= "food";
@@ -83,7 +83,7 @@ public class DatabaseAdapter {
 			maybeCreate(ChunkColumns.TABLE) +
 			"(" + 
 			ChunkColumns._ID      			+ " integer primary key autoincrement, " +
-			ChunkColumns.CREATED_AT			+ " text not null" +
+			ChunkColumns.CREATED_AT			+ " text not null, " +
 			ChunkColumns.FROM				+ " text not null, " +
 			ChunkColumns.UNTIL				+ " text not null, " +
 			ChunkColumns.STRESS				+ " integer not null, " +

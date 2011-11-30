@@ -8,6 +8,7 @@ import android.database.Cursor;
 
 import com.overseer.db.DatabaseAdapter;
 import com.overseer.db.DatabaseAdapter.ChunkColumns;
+import com.overseer.utils.Log;
 
 public class Chunk {
 	private Date from;
@@ -83,47 +84,52 @@ public class Chunk {
 	
 	public void setAvailableFor(Date left, Date right){
 		if(getFrom() == null){
-			setFrom(left);
-			setUntil(right);
+			this.setFrom(left);
+			this.setUntil(right);
 		}else{
-			if(getFrom().before(left)){
+			if(this.getFrom().before(left)){
 				// already contains the period
 			}else{
-				setFrom(left);
+				this.setFrom(left);
 			}
 			
-			if(getUntil().after(right)){
+			if(this.getUntil().after(right)){
 				// already contains the period
 			}else{
-				setUntil(right);
+				this.setUntil(right);
 			}
 		}
 	}
 	
 	// calculates chunks by truncating data (stops at the two digits after the decimal)
 	public static List<Chunk> calculateChunksByCoordinates(DatabaseAdapter db){
+		Log.d("I AM CHUNKING!");
 		List<Coordinate> coordinates = Coordinate.all(db);
 		List<Chunk> ret = new ArrayList<Chunk>();
 		Coordinate left;
 		Coordinate right;
 		Chunk temp = new Chunk();
 		
-		for(int i = 0; i<=coordinates.size()-2; i+=2){
+		for(int i = 0; i<=coordinates.size()-2; i++){
 			left = coordinates.get(i);
 			right = coordinates.get(i+1);
 			
-			left.setLatitude(round(left.getLatitude(), 2));
-			left.setLongitude(round(left.getLongitude(), 2));
-			right.setLatitude(round(right.getLatitude(), 2));
-			right.setLongitude(round(right.getLongitude(), 2));
+			left.setLatitude(round(left.getLatitude(), 3));
+			left.setLongitude(round(left.getLongitude(), 3));
+			right.setLatitude(round(right.getLatitude(), 3));
+			right.setLongitude(round(right.getLongitude(), 3));
+			
+			Log.d(left.getLatitude() + ", " + left.getLongitude() + " == " + right.getLatitude() + ", "+ right.getLongitude());
 			
 			if(left.getLatitude() == right.getLatitude() ||
 					left.getLongitude() == right.getLongitude()){
 				// if the chunk is in range, expand the availability of the chunk
 				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
+				Log.d("JUST EXPANDED THIS CHUNK -> " + temp.getFrom() + ", " + temp.getUntil());
 			}else{
 				// otherwise, save the current chunk and start again!
 				ret.add(temp);
+				Log.d("JUST ADDED THIS CHUNK -> " + temp.getFrom());
 				temp = new Chunk();
 				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
 			}
@@ -132,27 +138,33 @@ public class Chunk {
 		return ret;
 	}
 	
+	//TODO: CHANGE THE MAXDIFFERENCE TO SOMETHING REASONABLE
 	public static List<Chunk> calculateChunksByActivityPoints(DatabaseAdapter db){
+		Log.d("I AM CHUNKING!");
 		List<ActivityPoint> points = ActivityPoint.all(db);
 		List<Chunk> ret = new ArrayList<Chunk>();
 		ActivityPoint left;
 		ActivityPoint right;
 		Chunk temp = new Chunk();
 		double avg;
-		int MAXDIFFERENCE = 2;
+		int MAXDIFFERENCE = 1;
 		
-		for(int i = 0; i<=points.size()-2; i+=2){
+		for(int i = 0; i<=points.size()-2; i++){
 			left = points.get(i);
 			right = points.get(i+1);
 			
 			avg = (left.getMagnitude() + right.getMagnitude())/2;
 			
-			if((avg-left.getMagnitude()) < MAXDIFFERENCE){
+			Log.d("difference -> " + Math.abs(avg-left.getMagnitude()));
+			
+			if(Math.abs(avg-left.getMagnitude()) < MAXDIFFERENCE){
 				// if the chunk is in range, expand the availability of the chunk
 				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
+				Log.d("JUST EXPANDED THIS CHUNK -> " + temp.getFrom() + ", " + temp.getUntil());
 			}else{
 				// otherwise, save the current chunk and start again!
 				ret.add(temp);
+				Log.d("JUST ADDED THIS CHUNK -> " + temp.getFrom());
 				temp = new Chunk();
 				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
 			}
