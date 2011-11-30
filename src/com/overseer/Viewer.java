@@ -1,5 +1,7 @@
 package com.overseer;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import com.google.android.maps.MapActivity;
@@ -8,8 +10,10 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.overseer.db.DbDoer;
 import com.overseer.models.ActivityPoint;
+import com.overseer.models.Chunk;
 import com.overseer.models.Coordinate;
 import com.overseer.utils.BasicItemizedOverlay;
+import com.overseer.utils.Comms;
 
 import android.content.Context;
 import android.content.Intent;
@@ -46,12 +50,27 @@ public class Viewer extends MapActivity {
     }
     
     private void setupState(){
+    	
+    	Comms.getComms(this);
+    	
     	new DbDoer<Object>(this){
 
 			@Override
 			public Object perform() {
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.HOUR_OF_DAY, -1);
+				Date left = cal.getTime();
+				cal.add(Calendar.HOUR_OF_DAY, 1);
+				Date right = cal.getTime();
 				mCoordinates = Coordinate.all(db);
 				mActivities = ActivityPoint.all(db);
+				Chunk.calculateChunksByActivityPoints(db);
+				Chunk.calculateChunksByCoordinates(db);
+				ActivityPoint.allBetween(db, left, right);
+				Coordinate.allBetween(db, left, right);
+				
+				
+				
 				return null;
 			}
         	

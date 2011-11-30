@@ -164,6 +164,10 @@ public class Chunk {
 		return db.getChunks();
 	}
 	
+	public static List<Coordinate> allBetween(DatabaseAdapter db, Date left, Date right){
+		return db.getCoordinatesBetween(left, right);
+	}
+	
 	public static double round(double value, int places) {
 	    if (places < 0) throw new IllegalArgumentException();
 

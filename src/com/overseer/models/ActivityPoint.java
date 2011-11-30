@@ -54,7 +54,7 @@ public class ActivityPoint implements DatabaseElement<ActivityPoint> {
 	}
 	
 	public static List<ActivityPoint> allBetween(DatabaseAdapter db, Date left, Date right){
-		return null;
+		return db.getActivityPointsBetween(left, right);
 	}
 	
 	public static List<ActivityPoint> all(DatabaseAdapter db){

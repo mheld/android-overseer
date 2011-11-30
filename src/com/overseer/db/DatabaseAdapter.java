@@ -152,6 +152,13 @@ public class DatabaseAdapter {
 					ActivityPointColumns.CREATED_AT+" ASC", new String[]{});
 		}
 		
+		public Cursor fetchAllActivityPointsBetween(Date left, Date right) {
+			return mDb.rawQuery("select * from "+ ActivityPointColumns.TABLE+" where "+
+					ActivityPointColumns.CREATED_AT+" > "+ left.getTime() +" and "+
+					ActivityPointColumns.CREATED_AT+" < "+ right.getTime() +" order by "+
+					ActivityPointColumns.CREATED_AT+" ASC", new String[]{});
+		}
+		
 		public long create(ActivityPoint a){
 			ContentValues initialValues = new ContentValues();
 			initialValues.put(ActivityPointColumns.MAGNITUDE, a.getMagnitude());
@@ -263,6 +270,10 @@ public class DatabaseAdapter {
 	
 	public List<ActivityPoint> getActivityPoints(){
 		return getActivityPoints(mDbHelper.fetchAllActivityPoints());
+	}
+	
+	public List<ActivityPoint> getActivityPointsBetween(Date left, Date right){
+		return getActivityPoints(mDbHelper.fetchAllActivityPointsBetween(left, right));
 	}
 
 	private List<ActivityPoint> getActivityPoints(Cursor apCursor){
