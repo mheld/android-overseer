@@ -50,8 +50,8 @@ public class Viewer extends MapActivity {
 
 			@Override
 			public Object perform() {
-				mCoordinates = Coordinate.allCoordinates(db);
-				mActivities = ActivityPoint.allActivityPoints(db);
+				mCoordinates = Coordinate.all(db);
+				mActivities = ActivityPoint.all(db);
 				return null;
 			}
         	

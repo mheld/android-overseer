@@ -1,6 +1,7 @@
 package com.overseer.db;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.overseer.models.ActivityPoint;
@@ -126,6 +127,13 @@ public class DatabaseAdapter {
 					CoordinateColumns.CREATED_AT+" ASC", new String[]{});
 		}
 		
+		public Cursor fetchAllCoordinatesBetween(Date left, Date right) {
+			return mDb.rawQuery("select * from "+ CoordinateColumns.TABLE+" where "+
+					CoordinateColumns.CREATED_AT+" > "+ left.getTime() +" and "+
+					CoordinateColumns.CREATED_AT+" < "+ right.getTime() +" order by "+
+					CoordinateColumns.CREATED_AT+" ASC", new String[]{});
+		}
+		
 		public long create(Coordinate c){
 			ContentValues initialValues = new ContentValues();
 			initialValues.put(CoordinateColumns.LATITUDE, c.getLatitude());
@@ -218,6 +226,10 @@ public class DatabaseAdapter {
 	
 	public List<Coordinate> getCoordinates(){
 		return getCoordinates(mDbHelper.fetchAllCoordinates());
+	}
+	
+	public List<Coordinate> getCoordinatesBetween(Date left, Date right){
+		return getCoordinates(mDbHelper.fetchAllCoordinatesBetween(left, right));
 	}
 
 	private List<Coordinate> getCoordinates(Cursor coordCursor){
