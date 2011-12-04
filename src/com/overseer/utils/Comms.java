@@ -1,7 +1,10 @@
 package com.overseer.utils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import android.provider.CallLog.*;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -10,23 +13,39 @@ import android.database.SQLException;
 public class Comms {
 
 	static String[] strFields = {
-			android.provider.CallLog.Calls.NUMBER, 
-			android.provider.CallLog.Calls.TYPE,
-			android.provider.CallLog.Calls.CACHED_NAME,
-			android.provider.CallLog.Calls.CACHED_NUMBER_TYPE,
+			Calls.NUMBER, 
+			Calls.TYPE,
+			Calls.CACHED_NAME,
+			Calls.CACHED_NUMBER_TYPE,
 	};
 	
-	static String strOrder = android.provider.CallLog.Calls.DATE + " DESC"; 
+	static String strOrder = Calls.DATE + " DESC"; 
 
 	public static List<String> getComms(Context context){
 		Cursor callCursor = context.getContentResolver().query(
-				android.provider.CallLog.Calls.CONTENT_URI,
+				Calls.CONTENT_URI,
 				strFields,
 				null,
 				null,
 				strOrder
 				);
 		
+		return getComms(callCursor);
+	}
+	
+	public static List<String> getCommsBetween(Context context, Date left, Date right){
+		Cursor callCursor = context.getContentResolver().query(
+				Calls.CONTENT_URI,
+				strFields,
+				Calls.DATE+" > "+left.getTime() + " and " + Calls.DATE + " < " + right.getTime(),
+				null,
+				strOrder
+				);
+		
+		return getComms(callCursor);
+	}
+	
+	public static List<String> getComms(Cursor callCursor){
 		try {
 			ArrayList<String> coordinates = new ArrayList<String>();
 
@@ -34,7 +53,7 @@ public class Comms {
 			for (int i = 0; i < callCursor.getCount(); i++) {
 				coordinates.add(callCursor.getString(
 						callCursor.getColumnIndex(
-								android.provider.CallLog.Calls.CACHED_NAME)));
+								Calls.CACHED_NAME)));
 				callCursor.moveToNext();
 			}
 			callCursor.close();

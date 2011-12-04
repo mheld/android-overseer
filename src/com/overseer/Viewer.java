@@ -52,7 +52,9 @@ public class Viewer extends MapActivity {
     
     private void setupState(){
     	
-    	Comms.getComms(this);
+    	for(String s : Comms.getComms(this)){
+    		Log.d(s);
+    	}
     	
     	new DbDoer<Object>(this){
 
