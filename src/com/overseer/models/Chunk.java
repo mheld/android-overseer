@@ -101,7 +101,7 @@ public class Chunk {
 		}
 	}
 	
-	// calculates chunks by truncating data (stops at the two digits after the decimal)
+	// calculates chunks by truncating data (stops at the three digits after the decimal)
 	public static List<Chunk> calculateChunksByCoordinates(DatabaseAdapter db){
 		Log.d("I AM CHUNKING!");
 		List<Coordinate> coordinates = Coordinate.all(db);

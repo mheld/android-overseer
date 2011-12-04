@@ -2,6 +2,7 @@ package com.overseer;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.android.maps.MapActivity;
@@ -76,6 +77,10 @@ public class Viewer extends MapActivity {
 				//for(Chunk c : Chunk.calculateChunksByActivityPoints(db)){
 					Log.d("start at -> "+c.getFrom());
 					Log.d("end at -> "+c.getUntil());
+				}
+				HashMap<Coordinate, Integer> hash = Coordinate.allLocations(db);
+				for(Coordinate c : hash.keySet()){
+					Log.d("count("+c.toString() +") -> " + hash.get(c));
 				}
 				//ActivityPoint.allBetween(db, left, right);
 				//Coordinate.allBetween(db, left, right);
