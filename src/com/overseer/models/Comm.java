@@ -1,8 +1,10 @@
-package com.overseer.utils;
+package com.overseer.models;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import com.overseer.utils.Log;
 
 import android.provider.CallLog.*;
 
@@ -10,7 +12,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 
-public class Comms {
+public class Comm {
 
 	static String[] strFields = {
 			Calls.NUMBER, 
@@ -21,7 +23,7 @@ public class Comms {
 	
 	static String strOrder = Calls.DATE + " DESC"; 
 
-	public static List<String> getComms(Context context){
+	public static List<String> all(Context context){
 		Cursor callCursor = context.getContentResolver().query(
 				Calls.CONTENT_URI,
 				strFields,
@@ -33,7 +35,7 @@ public class Comms {
 		return getComms(callCursor);
 	}
 	
-	public static List<String> getCommsBetween(Context context, Date left, Date right){
+	public static List<String> allBetween(Context context, Date left, Date right){
 		Cursor callCursor = context.getContentResolver().query(
 				Calls.CONTENT_URI,
 				strFields,

@@ -11,9 +11,10 @@ import com.google.android.maps.OverlayItem;
 import com.overseer.db.DbDoer;
 import com.overseer.models.ActivityPoint;
 import com.overseer.models.Chunk;
+import com.overseer.models.Comm;
 import com.overseer.models.Coordinate;
+import com.overseer.models.Purchase;
 import com.overseer.utils.BasicItemizedOverlay;
-import com.overseer.utils.Comms;
 import com.overseer.utils.Log;
 
 import android.content.Context;
@@ -52,8 +53,12 @@ public class Viewer extends MapActivity {
     
     private void setupState(){
     	
-    	for(String s : Comms.getComms(this)){
+    	for(String s : Comm.all(this)){
     		Log.d(s);
+    	}
+    	
+    	for(Purchase s : Purchase.all(this)){
+    		Log.d(s.toString());
     	}
     	
     	new DbDoer<Object>(this){
