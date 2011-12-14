@@ -27,6 +27,10 @@ public class DatabaseAdapter {
 	public DatabaseAdapter(Context c){
 		this.context = c.getApplicationContext();		
 	};
+	
+	public Context getContext(){
+		return this.context;
+	}
 
 	/*o***********************************************************************/
 	/*COORDINATES*************************************************************/

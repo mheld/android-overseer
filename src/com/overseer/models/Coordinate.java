@@ -147,7 +147,6 @@ public class Coordinate implements DatabaseElement<Coordinate> {
 	
 	@Override
 	public int hashCode(){
-		Log.d("hashing: " + this.toString() + " ->  " + (this.getLatitude()*1000 + this.getLongitude()*1000));
 		return (int) (this.getLatitude()*1000 + this.getLongitude()*1000);
 	}
 

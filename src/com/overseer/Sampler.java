@@ -49,7 +49,7 @@ public class Sampler extends IntentService {
 				sampleActivity(context);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+
 		}
 	}
 

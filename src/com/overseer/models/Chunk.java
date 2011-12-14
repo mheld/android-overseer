@@ -1,11 +1,17 @@
 package com.overseer.models;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import android.content.res.AssetManager;
 import android.database.Cursor;
 
+import com.csvreader.CsvReader;
 import com.overseer.db.DatabaseAdapter;
 import com.overseer.db.DatabaseAdapter.ChunkColumns;
 import com.overseer.utils.Log;
@@ -103,7 +109,6 @@ public class Chunk {
 	
 	// calculates chunks by truncating data (stops at the three digits after the decimal)
 	public static List<Chunk> calculateChunksByCoordinates(DatabaseAdapter db){
-		Log.d("I AM CHUNKING!");
 		List<Coordinate> coordinates = Coordinate.all(db);
 		List<Chunk> ret = new ArrayList<Chunk>();
 		Coordinate left;
@@ -119,17 +124,13 @@ public class Chunk {
 			right.setLatitude(round(right.getLatitude(), 3));
 			right.setLongitude(round(right.getLongitude(), 3));
 			
-			Log.d(left.getLatitude() + ", " + left.getLongitude() + " == " + right.getLatitude() + ", "+ right.getLongitude());
-			
 			if(left.getLatitude() == right.getLatitude() ||
 					left.getLongitude() == right.getLongitude()){
 				// if the chunk is in range, expand the availability of the chunk
 				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
-				Log.d("JUST EXPANDED THIS CHUNK -> " + temp.getFrom() + ", " + temp.getUntil());
 			}else{
 				// otherwise, save the current chunk and start again!
 				ret.add(temp);
-				Log.d("JUST ADDED THIS CHUNK -> " + temp.getFrom());
 				temp = new Chunk();
 				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
 			}
@@ -141,34 +142,77 @@ public class Chunk {
 	//TODO: CHANGE THE MAXDIFFERENCE TO SOMETHING REASONABLE
 	public static List<Chunk> calculateChunksByActivityPoints(DatabaseAdapter db){
 		Log.d("I AM CHUNKING!");
-		List<ActivityPoint> points = ActivityPoint.all(db);
+		double diff;
+		double MAXDIFFERENCE = 0.2;	
+		BigInteger i = BigInteger.ZERO;
+		
+		AssetManager assets = db.getContext().getAssets();
 		List<Chunk> ret = new ArrayList<Chunk>();
-		ActivityPoint left;
+		ActivityPoint left = null;
 		ActivityPoint right;
 		Chunk temp = new Chunk();
-		double avg;
-		int MAXDIFFERENCE = 1;
 		
-		for(int i = 0; i<=points.size()-2; i++){
-			left = points.get(i);
-			right = points.get(i+1);
-			
-			avg = (left.getMagnitude() + right.getMagnitude())/2;
-			
-			Log.d("difference -> " + Math.abs(avg-left.getMagnitude()));
-			
-			if(Math.abs(avg-left.getMagnitude()) < MAXDIFFERENCE){
-				// if the chunk is in range, expand the availability of the chunk
-				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
-				Log.d("JUST EXPANDED THIS CHUNK -> " + temp.getFrom() + ", " + temp.getUntil());
-			}else{
-				// otherwise, save the current chunk and start again!
-				ret.add(temp);
-				Log.d("JUST ADDED THIS CHUNK -> " + temp.getFrom());
-				temp = new Chunk();
-				temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.HOUR_OF_DAY,-5); //not sure how long that data stream was
+
+		try {
+			CsvReader acts = new CsvReader(assets.open("Actigraphs.csv"), Charset.defaultCharset());
+			boolean first = true;
+			while (acts.readRecord()){
+				
+				try{
+					acts.get(0);
+				}catch(IOException e){
+					//we've hit a blank line
+					break;
+				}
+				
+				if(first){
+					//set left
+					left = new ActivityPoint(
+							Math.sqrt(
+									Math.pow(Double.parseDouble(acts.get(0)), 2) +
+									Math.pow(Double.parseDouble(acts.get(1)), 2) +
+									Math.pow(Double.parseDouble(acts.get(2)), 2) ), cal.getTime());
+				}else{
+					//set right
+					right = new ActivityPoint(
+							Math.sqrt(
+									Math.pow(Double.parseDouble(acts.get(0)), 2) +
+									Math.pow(Double.parseDouble(acts.get(1)), 2) +
+									Math.pow(Double.parseDouble(acts.get(2)), 2) ), cal.getTime());
+					//compare
+					diff = Math.abs(left.getMagnitude() - right.getMagnitude());
+					
+					Log.d(i + " diff: " + diff + " -- tol: " + left.getMagnitude()*MAXDIFFERENCE);
+					
+					//if the difference between the chunks is less that 20% of the left chunk
+					if(diff < left.getMagnitude()*MAXDIFFERENCE ){
+						// if the chunk is in range, expand the availability of the chunk
+						temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
+						Log.d("JUST EXPANDED THIS CHUNK -> " + temp.getFrom() + ", " + temp.getUntil());
+					}else{
+						// otherwise, save the current chunk and start again!
+						ret.add(temp);
+						Log.d("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+						Log.d("JUST ADDED THIS CHUNK -> " + temp.getFrom());
+						Log.d("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+						temp = new Chunk();
+						temp.setAvailableFor(left.getCreatedAt(), right.getCreatedAt());
+					}
+				}
+				
+				//alternate
+				first = !first;
+				
+				cal.add(Calendar.MILLISECOND, 5);
+				i = i.add(BigInteger.ONE);
 			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		
 		return ret;
 	}
 	

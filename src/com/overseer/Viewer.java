@@ -52,41 +52,17 @@ public class Viewer extends MapActivity {
     	this.sendBroadcast(i);
     }
     
-    private void setupState(){
-    	
-    	for(String s : Comm.all(this)){
-    		Log.d(s);
-    	}
-    	
-    	for(Purchase s : Purchase.all(this)){
-    		Log.d(s.toString());
-    	}
-    	
+    private void setupState(){    	
     	new DbDoer<Object>(this){
 
 			@Override
 			public Object perform() {
-				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.HOUR_OF_DAY, -1);
-				Date left = cal.getTime();
-				cal.add(Calendar.HOUR_OF_DAY, 1);
-				Date right = cal.getTime();
 				mCoordinates = Coordinate.all(db);
-				//mActivities = ActivityPoint.all(db);
-				for(Chunk c: Chunk.calculateChunksByCoordinates(db)){
-				//for(Chunk c : Chunk.calculateChunksByActivityPoints(db)){
+				for(Chunk c : Chunk.calculateChunksByActivityPoints(db)){
 					Log.d("start at -> "+c.getFrom());
 					Log.d("end at -> "+c.getUntil());
 				}
-				HashMap<Coordinate, Integer> hash = Coordinate.allLocations(db);
-				for(Coordinate c : hash.keySet()){
-					Log.d("count("+c.toString() +") -> " + hash.get(c));
-				}
-				//ActivityPoint.allBetween(db, left, right);
-				//Coordinate.allBetween(db, left, right);
-				
-				
-				
+
 				return null;
 			}
         	
